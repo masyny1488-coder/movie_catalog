@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Редактировать фильм</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-body">
+    
+    <nav class="navbar bg-body-tertiary border-bottom mb-4">
+        <div class="container">
+            <a href="/" class="navbar-brand text-decoration-none text-white fs-2" style="font-weight: 900; letter-spacing: -1px;">
+     Кино<span style="color: #e50914; font-weight: 900;">мания</span>
+</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <h2 class="mb-4">Редактирование фильма</h2>
+        
+        <div class="card shadow border-secondary">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Название фильма</label>
+                        <input type="text" name="title" class="form-control" value="{{ movie['title'] }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea name="description" class="form-control" rows="3" required>{{ movie['description'] }}</textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Рейтинг</label>
+                            <input type="number" step="0.1" min="0" max="10" name="rating" class="form-control" value="{{ movie['rating'] }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Жанр</label>
+                            <input type="text" name="genre" class="form-control" value="{{ movie['genre'] }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ссылка на трейлер</label>
+                        <input type="url" name="video_url" class="form-control" value="{{ movie['video_url'] }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ссылка на постер (URL картинки)</label>
+                        <input type="url" name="poster_url" class="form-control" value="{{ movie['poster_url'] }}" required>
+                    </div>
+                    <hr class="border-secondary my-4">
+                    <h5 class="mb-3 text-warning">Актерский состав (до 3-х человек)</h5>
+                    
+                    {% for i in range(0, 3) %}
+                    <div class="row g-2 mb-3 border-bottom border-dark pb-2">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Актер {{ i+1 }} — Имя</label>
+                            <input type="text" name="actor{{ i+1 }}_name" class="form-control form-control-sm" 
+                                   value="{{ actors[i]['name'] if actors and i < actors|length else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Актер {{ i+1 }} — URL фото</label>
+                            <input type="url" name="actor{{ i+1 }}_photo" class="form-control form-control-sm" 
+                                   value="{{ actors[i]['photo_url'] if actors and i < actors|length else '' }}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-warning text-dark w-100 fw-bold">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

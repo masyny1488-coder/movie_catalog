@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ movie['title'] }} — Смотреть Онлайн</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .ratio-16x9 {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .ratio-16x9 iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        /* Стиль для круглых аватарок актеров */
+        .actor-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #373b3e;
+            transition: transform 0.2s ease;
+        }
+        .actor-card:hover .actor-img {
+            transform: scale(1.08);
+            border-color: #ffc107;
+        }
+    </style>
+</head>
+<body class="bg-body">
+
+    <nav class="navbar bg-body-tertiary border-bottom mb-5">
+        <div class="container">
+            <a href="/" class="navbar-brand text-decoration-none text-white fs-2" style="font-weight: 900; letter-spacing: -1px;">
+     Кино<span style="color: #e50914; font-weight: 900;">мания</span>
+</a>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        <div class="row g-5">
+            <div class="col-md-4 text-center">
+                <img src="{{ movie['poster_url'] }}" class="img-fluid rounded shadow-lg border border-secondary" alt="Постер" style="max-height: 500px;">
+                <div class="d-flex gap-2 justify-content-center mt-4">
+                    <a href="{{ url_for('edit_movie', id=movie['id']) }}" class="btn btn-warning text-dark fw-bold px-4">Редактировать</a>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <h1 class="fw-bold m-0">{{ movie['title'] }}</h1>
+                    <span class="badge {% if movie['rating']|float >= 7.0 %}bg-success{% elif movie['rating']|float >= 5.0 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-4 fw-bold">
+                        ★ {{ movie['rating'] }}
+                    </span>
+                </div>
+                
+                <p class="text-muted fs-5 mb-4"><strong>Жанр:</strong> {{ movie['genre'] }}</p>
+                
+                <h5 class="fw-bold">О сюжете:</h5>
+                <p class="text-secondary fs-6 mb-5" style="line-height: 1.6;">{{ movie['description'] }}</p>
+
+                <h3 class="fw-bold mb-3"> Смотреть онлайн</h3>
+                <div class="ratio-16x9 shadow-lg mb-5">
+    <iframe src="{{ movie['video_url'] }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+            </div>
+        </div>
+
+        <hr class="my-5 border-secondary">
+
+        <div class="row">
+            <div class="col-12">
+                <h3 class="fw-bold mb-4 text-center text-md-start"> В главных ролях</h3>
+                {% if actors %}
+                    <div class="d-flex flex-wrap gap-5 justify-content-center justify-content-md-start">
+                        {% for actor in actors %}
+                        <div class="text-center actor-card" style="width: 140px;">
+                            <img src="{{ actor['photo_url'] }}" class="actor-img shadow mb-2" alt="{{ actor['name'] }}">
+                            <div class="fw-bold text-light small">{{ actor['name'] }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Информация об актерском составе пока не добавлена.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

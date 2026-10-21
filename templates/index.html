@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> NETFLIX НА МИНИМАЛКАХ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        .movie-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffc107 !important;
+        }
+        .card-img-container {
+            height: 450px;
+            width: 100%;
+            background-color: #1a1d20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #373b3e;
+            position: relative;
+        }
+        .movie-description-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #f8f9fa;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+            z-index: 10;
+        }
+        .movie-card:hover .movie-description-overlay {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .card-footer {
+            z-index: 20;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-body">
+    
+    <nav class="navbar navbar-expand-md bg-body-tertiary border-bottom mb-4 shadow-sm">
+        <div class="container">
+            <a href="/" class="navbar-brand text-decoration-none text-white fs-2" style="font-weight: 900; letter-spacing: -1px;">
+     Кино<span style="color: #e50914; font-weight: 900;">мания</span>
+</a>
+            
+            <div class="mx-auto my-2 my-md-0" style="max-width: 400px; width: 100%;">
+                <input type="text" id="movieSearch" class="form-control form-control-sm border-secondary" placeholder="🔍 Быстрый поиск по названию...">
+            </div>
+
+            <a class="btn btn-success btn-sm fw-bold ms-md-3" href="/add">+ Добавить фильм</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="mb-5 fw-bold text-center">Главные премьеры</h1>
+        
+        <div id="noMoviesMessage" class="alert alert-secondary text-center d-none my-4">
+            Фильмы с таким названием не найдены 😢
+        </div>
+
+        <div class="row" id="moviesGrid">
+            {% for movie in movies %}
+            <div class="col-md-4 mb-4 movie-item">
+                <div class="card h-100 shadow movie-card border-secondary" onclick="location.href='/movie/{{ movie['id'] }}'">
+                    
+                    <div class="card-img-container">
+                        <span class="badge 
+                            {% if movie['rating']|float >= 7.0 %}
+                                bg-success
+                            {% elif movie['rating']|float >= 5.0 %}
+                                bg-warning text-dark
+                            {% else %}
+                                bg-danger
+                            {% endif %} 
+                            position-absolute top-0 end-0 m-3 fs-6 shadow fw-bold" style="z-index: 15;">
+                            ★ {{ movie['rating'] }}
+                        </span>
+
+                        <img src="{{ movie['poster_url'] }}" class="card-img-top" alt="Постер" style="height: 100%; width: 100%; object-fit: contain;">
+                        
+                        <div class="movie-description-overlay">
+                            <h4 class="fw-bold mb-3">{{ movie['title'] }}</h4>
+                            <p class="card-text text-secondary overflow-auto" style="max-height: 250px;">
+                                {{ movie['description'] }}
+                            </p>
+                            <span class="btn btn-outline-warning btn-sm mt-2 fw-bold">Подробнее</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body py-3 text-center">
+                        <h5 class="card-title fw-bold m-0 movie-title">{{ movie['title'] }}</h5>
+                        <small class="text-muted d-block mt-1">{{ movie['genre'] }}</small>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-top-0 d-flex gap-2 flex-wrap pb-3" onclick="event.stopPropagation();">
+                        <a href="/movie/{{ movie['id'] }}" class="btn btn-primary flex-grow-1 fw-bold">Смотреть</a>
+                        <a href="{{ url_for('edit_movie', id=movie['id']) }}" class="btn btn-warning text-dark btn-sm">Редакт.</a>
+                        <form action="{{ url_for('delete_movie', id=movie['id']) }}" method="POST" onsubmit="return confirm('Вы уверены?');" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Удал.</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('movieSearch');
+            const movieItems = document.querySelectorAll('.movie-item');
+            const noMoviesMessage = document.getElementById('noMoviesMessage');
+
+            searchInput.addEventListener('input', function () {
+                const filterText = searchInput.value.toLowerCase().trim();
+                let hasVisibleMovies = false;
+
+                movieItems.forEach(function (item) {
+                    const titleText = item.querySelector('.movie-title').textContent.toLowerCase();
+                    if (titleText.includes(filterText)) {
+                        item.classList.remove('d-none');
+                        hasVisibleMovies = true;
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+
+                if (hasVisibleMovies) {
+                    noMoviesMessage.classList.add('d-none');
+                } else {
+                    noMoviesMessage.classList.remove('d-none');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
